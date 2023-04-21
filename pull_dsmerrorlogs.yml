@@ -1,7 +1,6 @@
 ---
     - name: "To Retrieve all errorlog from Multiple Host and ZIP to same host"
       hosts: "{{ source_hosts }}"
-#      hosts: appserver01,appserver02
       become: yes
       ignore_errors: true      
       vars:
@@ -21,7 +20,6 @@
 
     - name: Fetch files from multiple hosts to Control Server
       hosts: "{{ source_hosts }}"
-#      hosts: appserver01,appserver02
       gather_facts: false
       become: yes
       vars:
@@ -40,7 +38,6 @@
 
     - name: Copy Final dsmerror zip file to Destination host from control server
       hosts: "{{ destination_host }}"
-#      hosts: appserver02
       gather_facts: false
       become: yes
       vars:
