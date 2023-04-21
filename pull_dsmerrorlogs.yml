@@ -7,7 +7,7 @@
         hostname: "{{ ansible_hostname }}"
         date: "{{ lookup('pipe', 'date +%Y-%m-%d') }}"   
       tasks:
-        - include: tasks/listdsmerror.yml
+        - include: tasks/listdsmerrorlogs.yml
 
     - name: To Create Temp dir on Control Server
       hosts: localhost
