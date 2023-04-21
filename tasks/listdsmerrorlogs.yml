@@ -2,7 +2,7 @@
         - name: "To list the dsmerror log file on soruce hosts"
           find:
 #            paths: /opt/tivoli/tsm/client/ba/bin
-            paths: "{{ dsmerror_path }}"
+            paths: "{{ dsmerrorlog_path }}"
             patterns: "dsmerror*"
             recurse: no
           register: dsmerrorlogfiles
