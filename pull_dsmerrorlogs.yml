@@ -1,0 +1,114 @@
+---
+    - name: "To Retrieve all errorlog from Multiple Host and ZIP to same host"
+#      hosts: "{{ source_hosts }}"
+      hosts: appserver01,appserver02
+      become: yes
+#      ignore_errors: true      
+      vars:
+        hostname: "{{ ansible_hostname }}"
+        date: "{{ lookup('pipe', 'date +%Y-%m-%d') }}"   
+      tasks:
+#        - include: tasks/readutilfile.yml
+        - name: "To list the dsmerror log file on soruce hosts"
+          find:
+            paths: /opt/tivoli/tsm/client/ba/bin
+            patterns: "dsmerror*"
+            recurse: no
+          register: dsmerrorlogfiles
+
+        - debug:
+            msg: "{{ dsmerrorlogfiles.files | map(attribute='path') | list }}"  
+
+        - name: "Create a zip file of dsmerror log files"
+          archive:
+            path: "{{ dsmerrorlogfiles.files | map(attribute='path') | list }}"
+            dest: "/tmp/{{ ansible_hostname }}_dsmerror_logs.zip"
+            format: zip
+
+    - name: To Create Temp dir on Control Server
+      hosts: localhost
+      gather_facts: true
+      vars:
+        temp_dir: "/tmp/TSM_ERROR_LOGS"      
+
+      tasks:
+#        - include: tasks/create_tempdir_tower.yml                
+         - name: Create a directory on control server.
+           file:
+              path: "{{ temp_dir }}"
+              state: directory
+              mode: 0755
+           when: inventory_hostname == "localhost"
+
+    - name: Fetch files from multiple hosts to Control Server
+#      hosts: "{{ source_hosts }}"
+      hosts: appserver01,appserver02
+      gather_facts: false
+      become: yes
+      vars:
+        temp_dir: "/tmp/TSM_ERROR_LOGS/"      
+
+      tasks:
+#        - include: tasks/fetch_files.yml
+        - name: Fetch files from source host to Control server
+          fetch:
+            src: "/tmp/{{ ansible_hostname }}_dsmerror_logs.zip"
+            dest: "{{ temp_dir }}"
+            flat: yes
+
+    - name: To List the files from contorl server and remove 
+      hosts: localhost
+      vars:
+        hostname: "{{ ansible_hostname }}"
+        date: "{{ lookup('pipe', 'date +%Y-%m-%d') }}"         
+      tasks:
+#        - include: tasks/remove_temp_control.yml
+        - name: "To list the ZIP file on Control server"
+          find:
+            paths: /tmp/TSM_ERROR_LOGS
+            patterns: "*.zip"
+            recurse: no
+          register: dsmerrorlogfiles_control
+
+        - debug:
+            msg: "{{ dsmerrorlogfiles_control.files | map(attribute='path') | list }}"  
+
+        - name: "Create a zip file of dsmerror log files"
+          archive:
+            path: "{{ dsmerrorlogfiles_control.files | map(attribute='path') | list }}"
+            dest: "/tmp/TSM_ERROR_LOGS/dsmerrorlogs_{{ date }}.zip"
+            format: zip
+            remove: yes
+
+    - name: Copy Final dsmerror zip file to Destination host from control server
+#      hosts: "{{ destination_host }}"
+      hosts: appserver02
+      gather_facts: false
+      become: yes
+      vars:
+        date: "{{ lookup('pipe', 'date +%Y-%m-%d') }}"
+        src: "/tmp/TSM_ERROR_LOGS/dsmerrorlogs_{{ date }}.zip"
+        dest: "/tmp/test"
+
+      tasks:
+#        - include: tasks/copy_files_dest.yml 
+        - name: Check if directory exists
+          stat:
+            path: "{{ dest }}"
+          register: dir_check
+
+        - name: Create directory
+          file:
+            path: "{{ dest }}"
+            state: directory
+          when: not dir_check.stat.exists
+
+        - name: Copy files from control server to target host
+          copy:
+            remote_src: no
+            src: "{{ src }}"
+            dest: "{{ dest }}" 
+#            follow: no
+          become: true
+          become_user: root
+          register: copy_result
