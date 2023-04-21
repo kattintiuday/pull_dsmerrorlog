@@ -1,4 +1,9 @@
 ---
+        - name: "To remove temp zip files from source host at begining of the play"
+          file:
+            path: /tmp/{{ ansible_hostname }}_dsmerror_logs.zip
+            state: absent
+
         - name: "To list the dsmerror log file on soruce hosts"
           find:
 #            paths: /opt/tivoli/tsm/client/ba/bin

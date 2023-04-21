@@ -47,3 +47,22 @@
 
       tasks:
         - include: tasks/copy_files_dest.yml
+
+
+    - name: To List the files from contorl server and remove 
+      hosts: localhost
+      tasks:
+        - include: tasks/remove_temp_control.yml
+
+
+    - name: "To Archive the logs"
+      hosts: "{{ destination_host }}"
+      become: yes
+      vars:
+        date: "{{ lookup('pipe', 'date +%Y-%m-%d') }}" 
+        reportdir: /tmp/test/
+        archivedir: /tmp/test/Archives/
+   #    ignore_errors: true
+      tasks:
+        - include: tasks/archive_logs.yml
+        - include: tasks/removearchives.yml        

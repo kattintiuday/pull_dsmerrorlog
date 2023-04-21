@@ -1,0 +1,16 @@
+---        
+        - name: Find temp zip files from contorl server
+          find:
+            paths: /tmp/TSM_ERROR_LOGS
+            patterns: "*.zip"
+            recurse: yes
+          register: dsmerrorzip_files
+
+        - debug:
+            msg: "{{ dsmerrorzip_files }}"
+
+        - name: Delete temp file from control server
+          file:
+            path: "{{ item.path }}"
+            state: absent
+          with_items: "{{ dsmerrorzip_files }}"            

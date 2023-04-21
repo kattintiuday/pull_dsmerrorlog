@@ -1,0 +1,21 @@
+---
+  - name: Move zip files older than 1 day to archives directory
+    find:
+      paths: "{{ reportdir }}"
+      patterns: "*.zip*"
+      age: 1d
+      file_type: file
+    register: zip_files_to_move
+
+  - name: Move zip files to archives directory
+    file:
+      src: "{{ item.path }}"
+      dest: "{{ archivedir }}"
+      state: hard
+    with_items: "{{ zip_files_to_move.files }}"
+
+  - name: Remove the zip files older than 1 day 
+    file:
+      path: "{{ item.path }}"
+      state: absent
+    with_items: "{{ zip_files_to_move.files }}"  

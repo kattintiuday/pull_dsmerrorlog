@@ -1,0 +1,13 @@
+---
+- name: Remove archives older than 7 days
+  find:
+    paths: "{{ archivedir }}"
+    age: 7d
+    recurse: yes
+  register: archives_to_remove
+
+- name: Delete archives
+  file:
+    path: "{{ item.path }}"
+    state: absent
+  with_items: "{{ archives_to_remove.files }}"
