@@ -1,0 +1,6 @@
+         - name: Create a directory on control server.
+           file:
+              path: "{{ temp_dir }}"
+              state: directory
+              mode: 0755
+           when: inventory_hostname == "localhost"

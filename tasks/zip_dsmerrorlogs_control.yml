@@ -1,0 +1,16 @@
+        - name: "To list the ZIP file on Control server"
+          find:
+            paths: /tmp/TSM_ERROR_LOGS
+            patterns: "*.zip"
+            recurse: no
+          register: dsmerrorlogfiles_control
+
+        - debug:
+            msg: "{{ dsmerrorlogfiles_control.files | map(attribute='path') | list }}"  
+
+        - name: "Create a zip file of dsmerror log files"
+          archive:
+            path: "{{ dsmerrorlogfiles_control.files | map(attribute='path') | list }}"
+            dest: "/tmp/TSM_ERROR_LOGS/dsmerrorlogs_{{ date }}.zip"
+            format: zip
+            remove: yes

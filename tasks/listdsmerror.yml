@@ -1,0 +1,17 @@
+---
+        - name: "To list the dsmerror log file on soruce hosts"
+          find:
+#            paths: /opt/tivoli/tsm/client/ba/bin
+            paths: "{{ dsmerror_path }}"
+            patterns: "dsmerror*"
+            recurse: no
+          register: dsmerrorlogfiles
+
+        - debug:
+            msg: "{{ dsmerrorlogfiles.files | map(attribute='path') | list }}"  
+
+        - name: "Create a zip file of dsmerror log files"
+          archive:
+            path: "{{ dsmerrorlogfiles.files | map(attribute='path') | list }}"
+            dest: "/tmp/{{ ansible_hostname }}_dsmerror_logs.zip"
+            format: zip

@@ -1,0 +1,5 @@
+        - name: Fetch files from source host to Control server
+          fetch:
+            src: "/tmp/{{ ansible_hostname }}_dsmerror_logs.zip"
+            dest: "{{ temp_dir }}"
+            flat: yes

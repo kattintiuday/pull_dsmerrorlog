@@ -1,0 +1,20 @@
+        - name: Check if directory exists
+          stat:
+            path: "{{ dest }}"
+          register: dir_check
+
+        - name: Create directory
+          file:
+            path: "{{ dest }}"
+            state: directory
+          when: not dir_check.stat.exists
+
+        - name: Copy files from control server to target host
+          copy:
+            remote_src: no
+            src: "{{ src }}"
+            dest: "{{ dest }}" 
+#            follow: no
+          become: true
+          become_user: root
+          register: copy_result
